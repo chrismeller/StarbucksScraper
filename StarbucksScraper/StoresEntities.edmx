@@ -11,8 +11,8 @@
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="StoreID" Type="int" Nullable="false" />
-          <Property Name="Code" Type="varchar" MaxLength="5" Nullable="false" />
-          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Code" Type="nvarchar" MaxLength="5" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="255" Nullable="false" />
         </EntityType>
         <EntityType Name="RegularHours">
           <Key>
@@ -20,37 +20,35 @@
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="StoreID" Type="int" Nullable="false" />
-          <Property Name="Day" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Day" Type="nvarchar" MaxLength="10" Nullable="false" />
           <Property Name="Open" Type="bit" Nullable="false" />
           <Property Name="Open24Hours" Type="bit" Nullable="false" />
-          <Property Name="OpenTime" Type="varchar" MaxLength="8" Nullable="false" />
-          <Property Name="CloseTime" Type="varchar" MaxLength="8" Nullable="false" />
+          <Property Name="OpenTime" Type="nvarchar" MaxLength="8" Nullable="false" />
+          <Property Name="CloseTime" Type="nvarchar" MaxLength="8" Nullable="false" />
         </EntityType>
         <EntityType Name="Stores">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="QueriedZipCode" Type="varchar" MaxLength="5" Nullable="false" />
-          <Property Name="DistanceFrom" Type="float" Nullable="false" />
           <Property Name="StarbucksStoreID" Type="int" Nullable="false" />
-          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="BrandName" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="StoreNumber" Type="varchar" MaxLength="15" Nullable="false" />
-          <Property Name="PhoneNumber" Type="varchar" MaxLength="20" />
-          <Property Name="OwnershipType" Type="varchar" MaxLength="5" Nullable="false" />
-          <Property Name="Street1" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="Street2" Type="varchar" MaxLength="255" />
-          <Property Name="Street3" Type="varchar" MaxLength="255" />
-          <Property Name="City" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="CountrySubdivisionCode" Type="varchar" MaxLength="3" Nullable="false" />
-          <Property Name="CountryCode" Type="varchar" MaxLength="2" Nullable="false" />
-          <Property Name="PostalCode" Type="varchar" MaxLength="15" />
-          <Property Name="Latitude" Type="float" Nullable="false" />
-          <Property Name="Longitude" Type="float" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="BrandName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="StoreNumber" Type="nvarchar" MaxLength="15" Nullable="false" />
+          <Property Name="PhoneNumber" Type="nvarchar" MaxLength="20" />
+          <Property Name="OwnershipType" Type="nvarchar" MaxLength="5" Nullable="false" />
+          <Property Name="Street1" Type="nvarchar" MaxLength="255" />
+          <Property Name="Street2" Type="nvarchar" MaxLength="255" />
+          <Property Name="Street3" Type="nvarchar" MaxLength="255" />
+          <Property Name="City" Type="nvarchar" MaxLength="255" />
+          <Property Name="CountrySubdivisionCode" Type="nvarchar" MaxLength="3" Nullable="false" />
+          <Property Name="CountryCode" Type="nvarchar" MaxLength="2" Nullable="false" />
+          <Property Name="PostalCode" Type="nvarchar" MaxLength="15" />
+          <Property Name="Latitude" Type="float" />
+          <Property Name="Longitude" Type="float" />
           <Property Name="TZOffset" Type="int" Nullable="false" />
-          <Property Name="TZID" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="TZOlsonID" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="TZID" Type="nvarchar" MaxLength="50" />
+          <Property Name="TZOlsonID" Type="nvarchar" MaxLength="50" Nullable="false" />
         </EntityType>
         <Association Name="FK_Features_Stores">
           <End Role="Stores" Type="Self.Stores" Multiplicity="1">
@@ -103,8 +101,8 @@
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" />
           <Property Name="StoreID" Type="Int32" Nullable="false" />
-          <Property Name="Code" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Code" Type="String" MaxLength="5" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
           <NavigationProperty Name="Store" Relationship="Self.FK_Features_Stores" FromRole="Features" ToRole="Stores" />
         </EntityType>
         <EntityType Name="RegularHour">
@@ -113,11 +111,11 @@
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" />
           <Property Name="StoreID" Type="Int32" Nullable="false" />
-          <Property Name="Day" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Day" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="Open" Type="Boolean" Nullable="false" />
           <Property Name="Open24Hours" Type="Boolean" Nullable="false" />
-          <Property Name="OpenTime" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CloseTime" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="OpenTime" Type="String" MaxLength="8" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="CloseTime" Type="String" MaxLength="8" FixedLength="false" Unicode="true" Nullable="false" />
           <NavigationProperty Name="Store" Relationship="Self.FK_RegularHours_Stores" FromRole="RegularHours" ToRole="Stores" />
         </EntityType>
         <EntityType Name="Store">
@@ -125,26 +123,24 @@
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" />
-          <Property Name="QueriedZipCode" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="DistanceFrom" Type="Double" Nullable="false" />
           <Property Name="StarbucksStoreID" Type="Int32" Nullable="false" />
-          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="BrandName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="StoreNumber" Type="String" MaxLength="15" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="PhoneNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="OwnershipType" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Street1" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Street2" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="Street3" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="City" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CountrySubdivisionCode" Type="String" MaxLength="3" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CountryCode" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="PostalCode" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
-          <Property Name="Latitude" Type="Double" Nullable="false" />
-          <Property Name="Longitude" Type="Double" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="BrandName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="StoreNumber" Type="String" MaxLength="15" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PhoneNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="OwnershipType" Type="String" MaxLength="5" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Street1" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Street2" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Street3" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="City" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="CountrySubdivisionCode" Type="String" MaxLength="3" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="CountryCode" Type="String" MaxLength="2" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PostalCode" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
+          <Property Name="Latitude" Type="Double" />
+          <Property Name="Longitude" Type="Double" />
           <Property Name="TZOffset" Type="Int32" Nullable="false" />
-          <Property Name="TZID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="TZOlsonID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TZID" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="TZOlsonID" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
           <NavigationProperty Name="Features" Relationship="Self.FK_Features_Stores" FromRole="Stores" ToRole="Features" />
           <NavigationProperty Name="RegularHours" Relationship="Self.FK_RegularHours_Stores" FromRole="Stores" ToRole="RegularHours" />
         </EntityType>
@@ -222,8 +218,6 @@
             <EntityTypeMapping TypeName="StoresModel.Store">
               <MappingFragment StoreEntitySet="Stores">
                 <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="QueriedZipCode" ColumnName="QueriedZipCode" />
-                <ScalarProperty Name="DistanceFrom" ColumnName="DistanceFrom" />
                 <ScalarProperty Name="StarbucksStoreID" ColumnName="StarbucksStoreID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="BrandName" ColumnName="BrandName" />

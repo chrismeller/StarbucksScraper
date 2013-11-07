@@ -21,8 +21,6 @@ namespace StarbucksScraper
         }
     
         public int Id { get; set; }
-        public string QueriedZipCode { get; set; }
-        public double DistanceFrom { get; set; }
         public int StarbucksStoreID { get; set; }
         public string Name { get; set; }
         public string BrandName { get; set; }
@@ -36,8 +34,8 @@ namespace StarbucksScraper
         public string CountrySubdivisionCode { get; set; }
         public string CountryCode { get; set; }
         public string PostalCode { get; set; }
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
+        public Nullable<double> Latitude { get; set; }
+        public Nullable<double> Longitude { get; set; }
         public int TZOffset { get; set; }
         public string TZID { get; set; }
         public string TZOlsonID { get; set; }

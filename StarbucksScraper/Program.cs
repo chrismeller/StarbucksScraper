@@ -11,140 +11,124 @@ namespace StarbucksScraper
     class Program
     {
 
-        private static string _zipFilename = "zipCodes.txt";
+        private static int _limit = 50;
 
         static void Main(string[] args)
         {
 
-            try
+
+            // figure out where to start
+            using (var db = new StoresEntities())
             {
-                // figure out where to start
-                using (var db = new StoresEntities())
+
+                var currentEntries = db.Stores.Select(s => s.StarbucksStoreID).Count();
+                var offset = 0;
+
+                if (currentEntries == 0)
                 {
-
-                    var startingZip = db.Stores.Select(s => s.QueriedZipCode).Max();
-
-                    if (startingZip == null)
-                    {
-                        Console.WriteLine("No existing data, starting with beginning zip.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Existing data present, starting with zip {0}", startingZip);
-                    }
-
-                    // first, read in our list of zip codes
-                    var zips = File.ReadLines(_zipFilename)
-                       .Skip(1)
-                       .Select(line => line.Trim())
-                       .Where(line => line != "")
-                       .Select(line => line.Split('\t'))
-                       .Select(tokens => new ZipCode { Code = tokens[0], Latitude = tokens[7], Longitude = tokens[8] })
-                       .Where(zip => (startingZip == null || Int32.Parse(zip.Code) >= Int32.Parse(startingZip)))
-                       .ToList();
-
-                    // create our rest client
-                    var client = new RestClient("https://openapi.starbucks.com/");
-                    client.AddHandler("application/javascript", new RestSharp.Deserializers.JsonDeserializer());     // specify that we want our application/javascript deserialized as json
-
-                    foreach (var zip in zips)
-                    {
-
-                        var offset = 0;
-                        IRestResponse<StarbucksResults> response;
-                        do
-                        {
-                            Console.WriteLine("Fetching zip {0} ({1}, {2}) stores at offset {3}", zip.Code, zip.Latitude, zip.Longitude, offset);
-
-                            var request = new RestRequest("location/v1/stores", Method.GET);
-                            request.AddParameter("apikey", "7b35m595vccu6spuuzu2rjh4");
-                            request.AddParameter("callback", "");
-                            request.AddParameter("radius", 100);
-                            request.AddParameter("limit", 50);
-                            request.AddParameter("ignore", "HoursNext7Days,today,extendedHours");
-
-                            if (offset > 0)
-                            {
-                                request.AddParameter("offset", offset);
-                            }
-
-                            request.AddParameter("latLng", String.Format("{0},{1}", zip.Latitude, zip.Longitude));
-                            //request.AddParameter("latLng", "34.8920374,-82.26919299999997");
-
-                            var attempts = 0;
-                            var threshold = 10;
-                            do
-                            {
-                                if (attempts > 0)
-                                {
-                                    Console.WriteLine("Retrying...");
-                                }
-
-                                response = client.Execute<StarbucksResults>(request);
-                                attempts++;
-                            }
-                            while (response != null && response.StatusCode != System.Net.HttpStatusCode.OK && attempts < threshold && response.ErrorMessage != "");
-
-                            if (response == null || response.StatusCode != System.Net.HttpStatusCode.OK)
-                            {
-                                throw new Exception("Response was null or status code was invalid and we're out of retries.");
-                            }
-
-                            Console.WriteLine("Got {0} in response.", response.Data.Paging.Returned);
-
-                            ProcessResults(response, zip.Code);
-
-                            offset = offset + response.Data.Paging.Limit;
-                        }
-                        while ((response.Data.Paging.Offset == 0 && response.Data.Paging.Total > response.Data.Paging.Limit) || (response.Data.Paging.Offset > 0 && (response.Data.Paging.Total > (response.Data.Paging.Offset * response.Data.Paging.Limit))));
-                    }
-
+                    Console.WriteLine("No existing data, starting from scratch.");
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
+                else
+                {
+                    // let's add a little overlap there, just to be safe.
+                    offset = currentEntries - _limit;
+                    Console.WriteLine("Existing data present, starting with {0} current stores, offset {1}.", currentEntries, offset);
+                }
+
+                // create our rest client
+                var client = new RestClient("https://openapi.starbucks.com/");
+                client.AddHandler("application/javascript", new RestSharp.Deserializers.JsonDeserializer());     // specify that we want our application/javascript deserialized as json
+
+
+                IRestResponse<StarbucksResults> response;
+                do
+                {
+                    Console.WriteLine("Fetching page at offset {0}", offset);
+
+                    var request = new RestRequest("location/v1/stores", Method.GET);
+                    request.AddParameter("apikey", "7b35m595vccu6spuuzu2rjh4");
+                    request.AddParameter("callback", "");
+                    request.AddParameter("limit", _limit);
+                    request.AddParameter("ignore", "HoursNext7Days,today,extendedHours");
+
+                    if (offset > 0)
+                    {
+                        request.AddParameter("offset", offset);
+                    }
+
+                    var attempts = 0;
+                    var threshold = 10;
+                    do
+                    {
+                        if (attempts > 0)
+                        {
+                            Console.WriteLine("Retrying...");
+                        }
+
+                        response = client.Execute<StarbucksResults>(request);
+                        attempts++;
+                    }
+                    while (response != null && response.StatusCode != System.Net.HttpStatusCode.OK && attempts < threshold && response.ErrorMessage != "");
+
+                    if (response == null || response.StatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        throw new Exception("Response was null or status code was invalid and we're out of retries.");
+                    }
+
+                    Console.WriteLine("Got {0} in response.", response.Data.Paging.Returned);
+
+                    ProcessResults(response);
+
+                    offset = offset + response.Data.Paging.Limit;
+                }
+                while ((response.Data.Paging.Offset == 0 && response.Data.Paging.Total > response.Data.Paging.Limit) || (response.Data.Paging.Offset > 0 && (response.Data.Paging.Total > (response.Data.Paging.Offset + response.Data.Paging.Limit))));
+
+                Console.Write("Complete");
                 Console.ReadKey();
+
             }
 
         }
 
-        static void ProcessResults(IRestResponse<StarbucksResults> response, string zip)
+        static void ProcessResults(IRestResponse<StarbucksResults> response)
         {
             using (var db = new StoresEntities())
             {
                 foreach (var item in response.Data.Items)
                 {
 
-                    if (db.Stores.Select(s => s.StarbucksStoreID).Where(s => s == item.Store.Id).Count() > 0)
+                    if (db.Stores.Select(s => s.StarbucksStoreID).Where(s => s == item.Id).Count() > 0)
                     {
                         continue;
                     }
 
                     var store = db.Stores.Create();
-                    store.BrandName = item.Store.BrandName;
-                    store.City = item.Store.Address.City;
-                    store.CountryCode = item.Store.Address.CountryCode;
-                    store.CountrySubdivisionCode = item.Store.Address.CountrySubdivisionCode;
-                    store.DistanceFrom = item.Distance;
-                    store.Latitude = item.Store.Coordinates.Latitude;
-                    store.Longitude = item.Store.Coordinates.Longitude;
-                    store.Name = item.Store.Name;
-                    store.OwnershipType = item.Store.OwnershipTypeCode;
-                    store.PhoneNumber = item.Store.PhoneNumber;
-                    store.PostalCode = item.Store.Address.PostalCode;
-                    store.QueriedZipCode = zip;
-                    store.StarbucksStoreID = item.Store.Id;
-                    store.StoreNumber = item.Store.StoreNumber;
-                    store.Street1 = item.Store.Address.StreetAddressLine1;
-                    store.Street2 = item.Store.Address.StreetAddressLine2;
-                    store.Street3 = item.Store.Address.StreetAddressLine3;
-                    store.TZID = item.Store.TimeZoneInfo.WindowsTimeZoneId;
-                    store.TZOffset = item.Store.TimeZoneInfo.CurrentTimeOffset;
-                    store.TZOlsonID = item.Store.TimeZoneInfo.OlsonTimeZoneId;
+                    store.BrandName = item.BrandName;
+                    store.City = item.Address.City;
+                    store.CountryCode = item.Address.CountryCode;
+                    store.CountrySubdivisionCode = item.Address.CountrySubdivisionCode;
+                    store.Name = item.Name;
+                    store.OwnershipType = item.OwnershipTypeCode;
+                    store.PhoneNumber = item.PhoneNumber;
+                    store.PostalCode = item.Address.PostalCode;
+                    store.StarbucksStoreID = item.Id;
+                    store.StoreNumber = item.StoreNumber;
+                    store.Street1 = item.Address.StreetAddressLine1;
+                    store.Street2 = item.Address.StreetAddressLine2;
+                    store.Street3 = item.Address.StreetAddressLine3;
+                    store.TZID = item.TimeZoneInfo.WindowsTimeZoneId;
+                    store.TZOffset = item.TimeZoneInfo.CurrentTimeOffset;
+                    store.TZOlsonID = item.TimeZoneInfo.OlsonTimeZoneId;
+
+                    // for a handful of stores (1 so far) the coordinates may actually be null
+                    if (item.Coordinates != null)
+                    {
+                        store.Latitude = item.Coordinates.Latitude;
+                        store.Longitude = item.Coordinates.Longitude;
+                    }
 
                     // now for the collections
-                    foreach (var feature in item.Store.Features)
+                    foreach (var feature in item.Features)
                     {
                         var f = db.Features.Create();
                         f.Code = feature.Code;
@@ -155,11 +139,11 @@ namespace StarbucksScraper
                         store.Features.Add(f);
                     }
 
-                    if (item.Store.RegularHours != null)
+                    if (item.RegularHours != null)
                     {
                         foreach (var day in new string[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" })
                         {
-                            StarbucksResultsItemsStoreRegularHour d = item.Store.RegularHours.GetType().GetProperty(day).GetValue(item.Store.RegularHours) as StarbucksResultsItemsStoreRegularHour;
+                            StarbucksResultsItemsStoreRegularHour d = item.RegularHours.GetType().GetProperty(day).GetValue(item.RegularHours) as StarbucksResultsItemsStoreRegularHour;
 
                             var hour = db.RegularHours.Create();
                             hour.Day = day;
@@ -186,8 +170,27 @@ namespace StarbucksScraper
 
                     Console.WriteLine("Wrote {0} items", wrote);
                 }
+                catch (System.Data.Entity.Validation.DbEntityValidationException e_validation)
+                {
+                    foreach (var error in e_validation.EntityValidationErrors)
+                    {
+                        Console.Write("Validation Errors:");
+                        foreach (var validation_error in error.ValidationErrors)
+                        {
+                            Console.WriteLine(validation_error.ErrorMessage);
+                        }
+
+                        Console.WriteLine("Entity:");
+                        foreach (var key in error.Entry.CurrentValues.PropertyNames)
+                        {
+                            Console.WriteLine(key + ": " + error.Entry.CurrentValues[key]);
+                        }
+                    }
+                    throw;
+                }
                 catch (Exception e)
                 {
+                    throw;
                     Console.WriteLine(e.ToString());
                 }
             }
@@ -197,17 +200,10 @@ namespace StarbucksScraper
 
     }
 
-    class ZipCode
-    {
-        public string Code;
-        public string Latitude;
-        public string Longitude;
-    }
-
     class StarbucksResults
     {
         public StarbucksResultsPaging Paging { get; set; }
-        public List<StarbucksResultsItems> Items { get; set; }
+        public List<StarbucksResultsItemsStore> Items { get; set; }
     }
 
     class StarbucksResultsPaging
@@ -218,6 +214,7 @@ namespace StarbucksScraper
         public int Returned { get; set; }
     }
 
+    // this class used to represent an item, which was a combination of distance from the queried point and a store object. without searching for a certain point and radius, the structure changes
     class StarbucksResultsItems
     {
         public float Distance { get; set; }
