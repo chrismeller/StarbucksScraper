@@ -1,0 +1,271 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="StoresModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Features">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="StoreID" Type="int" Nullable="false" />
+          <Property Name="Code" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RegularHours">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="StoreID" Type="int" Nullable="false" />
+          <Property Name="Day" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Open" Type="bit" Nullable="false" />
+          <Property Name="Open24Hours" Type="bit" Nullable="false" />
+          <Property Name="OpenTime" Type="varchar" MaxLength="8" Nullable="false" />
+          <Property Name="CloseTime" Type="varchar" MaxLength="8" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Stores">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="QueriedZipCode" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="DistanceFrom" Type="float" Nullable="false" />
+          <Property Name="StarbucksStoreID" Type="int" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="BrandName" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="StoreNumber" Type="varchar" MaxLength="15" Nullable="false" />
+          <Property Name="PhoneNumber" Type="varchar" MaxLength="20" />
+          <Property Name="OwnershipType" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="Street1" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Street2" Type="varchar" MaxLength="255" />
+          <Property Name="Street3" Type="varchar" MaxLength="255" />
+          <Property Name="City" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="CountrySubdivisionCode" Type="varchar" MaxLength="3" Nullable="false" />
+          <Property Name="CountryCode" Type="varchar" MaxLength="2" Nullable="false" />
+          <Property Name="PostalCode" Type="varchar" MaxLength="15" />
+          <Property Name="Latitude" Type="float" Nullable="false" />
+          <Property Name="Longitude" Type="float" Nullable="false" />
+          <Property Name="TZOffset" Type="int" Nullable="false" />
+          <Property Name="TZID" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="TZOlsonID" Type="varchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_Features_Stores">
+          <End Role="Stores" Type="Self.Stores" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Features" Type="Self.Features" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Stores">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Features">
+              <PropertyRef Name="StoreID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RegularHours_Stores">
+          <End Role="Stores" Type="Self.Stores" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="RegularHours" Type="Self.RegularHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Stores">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RegularHours">
+              <PropertyRef Name="StoreID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="StoresModelStoreContainer">
+          <EntitySet Name="Features" EntityType="Self.Features" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RegularHours" EntityType="Self.RegularHours" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Stores" EntityType="Self.Stores" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_Features_Stores" Association="Self.FK_Features_Stores">
+            <End Role="Stores" EntitySet="Stores" />
+            <End Role="Features" EntitySet="Features" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RegularHours_Stores" Association="Self.FK_RegularHours_Stores">
+            <End Role="Stores" EntitySet="Stores" />
+            <End Role="RegularHours" EntitySet="RegularHours" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="StoresModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Feature">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="StoreID" Type="Int32" Nullable="false" />
+          <Property Name="Code" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Store" Relationship="Self.FK_Features_Stores" FromRole="Features" ToRole="Stores" />
+        </EntityType>
+        <EntityType Name="RegularHour">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="StoreID" Type="Int32" Nullable="false" />
+          <Property Name="Day" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Open" Type="Boolean" Nullable="false" />
+          <Property Name="Open24Hours" Type="Boolean" Nullable="false" />
+          <Property Name="OpenTime" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CloseTime" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Store" Relationship="Self.FK_RegularHours_Stores" FromRole="RegularHours" ToRole="Stores" />
+        </EntityType>
+        <EntityType Name="Store">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="QueriedZipCode" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="DistanceFrom" Type="Double" Nullable="false" />
+          <Property Name="StarbucksStoreID" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="BrandName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="StoreNumber" Type="String" MaxLength="15" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="PhoneNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="OwnershipType" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Street1" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Street2" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Street3" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="City" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CountrySubdivisionCode" Type="String" MaxLength="3" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CountryCode" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="PostalCode" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="Latitude" Type="Double" Nullable="false" />
+          <Property Name="Longitude" Type="Double" Nullable="false" />
+          <Property Name="TZOffset" Type="Int32" Nullable="false" />
+          <Property Name="TZID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TZOlsonID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Features" Relationship="Self.FK_Features_Stores" FromRole="Stores" ToRole="Features" />
+          <NavigationProperty Name="RegularHours" Relationship="Self.FK_RegularHours_Stores" FromRole="Stores" ToRole="RegularHours" />
+        </EntityType>
+        <Association Name="FK_Features_Stores">
+          <End Role="Stores" Type="Self.Store" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Features" Type="Self.Feature" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Stores">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Features">
+              <PropertyRef Name="StoreID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RegularHours_Stores">
+          <End Role="Stores" Type="Self.Store" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="RegularHours" Type="Self.RegularHour" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Stores">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RegularHours">
+              <PropertyRef Name="StoreID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="StoresEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Features" EntityType="Self.Feature" />
+          <EntitySet Name="RegularHours" EntityType="Self.RegularHour" />
+          <EntitySet Name="Stores" EntityType="Self.Store" />
+          <AssociationSet Name="FK_Features_Stores" Association="Self.FK_Features_Stores">
+            <End Role="Stores" EntitySet="Stores" />
+            <End Role="Features" EntitySet="Features" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RegularHours_Stores" Association="Self.FK_RegularHours_Stores">
+            <End Role="Stores" EntitySet="Stores" />
+            <End Role="RegularHours" EntitySet="RegularHours" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="StoresModelStoreContainer" CdmEntityContainer="StoresEntities">
+          <EntitySetMapping Name="Features">
+            <EntityTypeMapping TypeName="StoresModel.Feature">
+              <MappingFragment StoreEntitySet="Features">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="StoreID" ColumnName="StoreID" />
+                <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RegularHours">
+            <EntityTypeMapping TypeName="StoresModel.RegularHour">
+              <MappingFragment StoreEntitySet="RegularHours">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="StoreID" ColumnName="StoreID" />
+                <ScalarProperty Name="Day" ColumnName="Day" />
+                <ScalarProperty Name="Open" ColumnName="Open" />
+                <ScalarProperty Name="Open24Hours" ColumnName="Open24Hours" />
+                <ScalarProperty Name="OpenTime" ColumnName="OpenTime" />
+                <ScalarProperty Name="CloseTime" ColumnName="CloseTime" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Stores">
+            <EntityTypeMapping TypeName="StoresModel.Store">
+              <MappingFragment StoreEntitySet="Stores">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="QueriedZipCode" ColumnName="QueriedZipCode" />
+                <ScalarProperty Name="DistanceFrom" ColumnName="DistanceFrom" />
+                <ScalarProperty Name="StarbucksStoreID" ColumnName="StarbucksStoreID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="BrandName" ColumnName="BrandName" />
+                <ScalarProperty Name="StoreNumber" ColumnName="StoreNumber" />
+                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+                <ScalarProperty Name="OwnershipType" ColumnName="OwnershipType" />
+                <ScalarProperty Name="Street1" ColumnName="Street1" />
+                <ScalarProperty Name="Street2" ColumnName="Street2" />
+                <ScalarProperty Name="Street3" ColumnName="Street3" />
+                <ScalarProperty Name="City" ColumnName="City" />
+                <ScalarProperty Name="CountrySubdivisionCode" ColumnName="CountrySubdivisionCode" />
+                <ScalarProperty Name="CountryCode" ColumnName="CountryCode" />
+                <ScalarProperty Name="PostalCode" ColumnName="PostalCode" />
+                <ScalarProperty Name="Latitude" ColumnName="Latitude" />
+                <ScalarProperty Name="Longitude" ColumnName="Longitude" />
+                <ScalarProperty Name="TZOffset" ColumnName="TZOffset" />
+                <ScalarProperty Name="TZID" ColumnName="TZID" />
+                <ScalarProperty Name="TZOlsonID" ColumnName="TZOlsonID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
