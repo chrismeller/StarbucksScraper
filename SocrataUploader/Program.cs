@@ -15,6 +15,15 @@ namespace SocrataUploader
         static void Main(string[] args)
         {
 
+            Console.WriteLine("Are you SURE you created a working copy and updated the dataset ID in your app.config?");
+            var key = Console.ReadKey();
+
+            if (key.Key != ConsoleKey.Y)
+            {
+                Console.WriteLine("Exiting...");
+                Environment.Exit(1);
+            }
+
             using (var db = new StoresEntities())
             {
 
@@ -27,13 +36,20 @@ namespace SocrataUploader
                 var basicAuthClient = new Soda2Client(username, password, appToken);
                 var dataset = basicAuthClient.getDatasetInfo<Row>(host, datasetId);
 
+                // truncate the new working copy we created - it's easier just to dump all new results and not horribly time consuming
                 Console.WriteLine("Truncating");
                 dataset.truncate();
 
                 LinkedList<Row> rows = new LinkedList<Row>();
 
+                // get the most recent LastSeen date, so we know what our new batch is
+                var mostRecent = db.Stores.Select(s => s.LastSeen).Max(s => (DateTime?)s);
+
+                // get all the stores in the most recent batch
+                var mostRecentStores = db.Stores.Where(s => s.LastSeen == mostRecent);
+
                 Row row;
-                foreach (var store in db.Stores)
+                foreach (var store in mostRecentStores)
                 {
                     var streetCombined = "";
 
@@ -91,6 +107,9 @@ namespace SocrataUploader
                     Console.WriteLine("Upserting last");
                     dataset.upsert(rows.ToArray());
                 }
+
+                Console.WriteLine("Complete");
+                Console.ReadKey();
 
             }
 
