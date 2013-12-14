@@ -49,6 +49,8 @@
           <Property Name="TZOffset" Type="int" Nullable="false" />
           <Property Name="TZID" Type="nvarchar" MaxLength="50" />
           <Property Name="TZOlsonID" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="LastSeen" Type="datetime" Nullable="false" />
+          <Property Name="FirstSeen" Type="datetime" Nullable="false" />
         </EntityType>
         <Association Name="FK_Features_Stores">
           <End Role="Stores" Type="Self.Stores" Multiplicity="1">
@@ -143,6 +145,8 @@
           <Property Name="TZOlsonID" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
           <NavigationProperty Name="Features" Relationship="Self.FK_Features_Stores" FromRole="Stores" ToRole="Features" />
           <NavigationProperty Name="RegularHours" Relationship="Self.FK_RegularHours_Stores" FromRole="Stores" ToRole="RegularHours" />
+          <Property Name="LastSeen" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="FirstSeen" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
         <Association Name="FK_Features_Stores">
           <End Role="Stores" Type="Self.Store" Multiplicity="1" >
@@ -217,6 +221,8 @@
           <EntitySetMapping Name="Stores">
             <EntityTypeMapping TypeName="StoresModel.Store">
               <MappingFragment StoreEntitySet="Stores">
+                <ScalarProperty Name="FirstSeen" ColumnName="FirstSeen" />
+                <ScalarProperty Name="LastSeen" ColumnName="LastSeen" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
                 <ScalarProperty Name="StarbucksStoreID" ColumnName="StarbucksStoreID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />

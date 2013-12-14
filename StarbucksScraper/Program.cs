@@ -12,16 +12,19 @@ namespace StarbucksScraper
     {
 
         private static int _limit = 50;
+        private static DateTime _lastSeen;
 
         static void Main(string[] args)
         {
 
+            // we're going to mark all the records in the DB as being last seen as of today to keep track of historical values -- round it to today to account for incomplete runs on the same day
+            _lastSeen = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 0, 0, 0, DateTimeKind.Utc);
 
             // figure out where to start
             using (var db = new StoresEntities())
             {
 
-                var currentEntries = db.Stores.Select(s => s.StarbucksStoreID).Count();
+                var currentEntries = db.Stores.Select(s => s.LastSeen).Where(s => s == _lastSeen).Count();
                 var offset = 0;
 
                 if (currentEntries == 0)
@@ -38,6 +41,8 @@ namespace StarbucksScraper
                 // create our rest client
                 var client = new RestClient("https://openapi.starbucks.com/");
                 client.AddHandler("application/javascript", new RestSharp.Deserializers.JsonDeserializer());     // specify that we want our application/javascript deserialized as json
+
+                client.Timeout = (10 * 1000);   // 10 seconds
 
 
                 IRestResponse<StarbucksResults> response;
@@ -79,6 +84,9 @@ namespace StarbucksScraper
 
                     ProcessResults(response);
 
+                    // sleep for half a second to avoid what may be rate throttling on the api
+                    System.Threading.Thread.Sleep(500);
+
                     offset = offset + response.Data.Paging.Limit;
                 }
                 while ((response.Data.Paging.Offset == 0 && response.Data.Paging.Total > response.Data.Paging.Limit) || (response.Data.Paging.Offset > 0 && (response.Data.Paging.Total > (response.Data.Paging.Offset + response.Data.Paging.Limit))));
@@ -97,12 +105,21 @@ namespace StarbucksScraper
                 foreach (var item in response.Data.Items)
                 {
 
-                    if (db.Stores.Select(s => s.StarbucksStoreID).Where(s => s == item.Id).Count() > 0)
+                    // check to see if the store we're looking for already exists
+                    var existing = db.Stores.Where(s => s.StarbucksStoreID == item.Id).FirstOrDefault();
+                    Store store;
+
+                    // if it exists, we want to update the existing object, rather than creating a new one
+                    if (existing != null)
                     {
-                        continue;
+                        store = existing;
+                    }
+                    else
+                    {
+                        // otherwise, we want to create a new store to insert
+                        store = db.Stores.Create();
                     }
 
-                    var store = db.Stores.Create();
                     store.BrandName = item.BrandName;
                     store.City = item.Address.City;
                     store.CountryCode = item.Address.CountryCode;
@@ -119,6 +136,13 @@ namespace StarbucksScraper
                     store.TZID = item.TimeZoneInfo.WindowsTimeZoneId;
                     store.TZOffset = item.TimeZoneInfo.CurrentTimeOffset;
                     store.TZOlsonID = item.TimeZoneInfo.OlsonTimeZoneId;
+                    store.LastSeen = _lastSeen;
+                    
+                    // only include the first seen date if this is a new entry
+                    if (existing == null)
+                    {
+                        store.FirstSeen = _lastSeen;
+                    }
 
                     // for a handful of stores (1 so far) the coordinates may actually be null
                     if (item.Coordinates != null)
@@ -127,40 +151,54 @@ namespace StarbucksScraper
                         store.Longitude = item.Coordinates.Longitude;
                     }
 
-                    // now for the collections
-                    foreach (var feature in item.Features)
+                    // we don't have the feature and hours updating down yet, so just ignore those updates if we got an existing store
+                    if (existing == null)
                     {
-                        var f = db.Features.Create();
-                        f.Code = feature.Code;
-                        f.Name = feature.Name;
-                        //f.StoreID = store.Id;
-                        f.Store = store;
 
-                        store.Features.Add(f);
-                    }
-
-                    if (item.RegularHours != null)
-                    {
-                        foreach (var day in new string[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" })
+                        // now for the collections
+                        foreach (var feature in item.Features)
                         {
-                            StarbucksResultsItemsStoreRegularHour d = item.RegularHours.GetType().GetProperty(day).GetValue(item.RegularHours) as StarbucksResultsItemsStoreRegularHour;
+                            var f = db.Features.Create();
+                            f.Code = feature.Code;
+                            f.Name = feature.Name;
+                            //f.StoreID = store.Id;
+                            f.Store = store;
 
-                            var hour = db.RegularHours.Create();
-                            hour.Day = day;
-                            hour.CloseTime = d.CloseTime;
-                            hour.Open = d.Open;
-                            hour.Open24Hours = d.Open24Hours;
-                            hour.OpenTime = d.OpenTime;
-                            hour.Store = store;
-
-                            store.RegularHours.Add(hour);
+                            store.Features.Add(f);
                         }
+
+                        if (item.RegularHours != null)
+                        {
+                            foreach (var day in new string[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" })
+                            {
+                                StarbucksResultsItemsStoreRegularHour d = item.RegularHours.GetType().GetProperty(day).GetValue(item.RegularHours) as StarbucksResultsItemsStoreRegularHour;
+
+                                var hour = db.RegularHours.Create();
+                                hour.Day = day;
+                                hour.CloseTime = d.CloseTime;
+                                hour.Open = d.Open;
+                                hour.Open24Hours = d.Open24Hours;
+                                hour.OpenTime = d.OpenTime;
+                                hour.Store = store;
+
+                                store.RegularHours.Add(hour);
+                            }
+                        }
+
                     }
 
-                    // insert the store to generate an ID
-                    db.Stores.Add(store);
+                    // we only need to add the store as a new element if this is not an update
+                    if (existing == null)
+                    {
+                        // insert the store to generate an ID
+                        db.Stores.Add(store);
 
-                    Console.WriteLine("Adding Store ID {0}", store.StarbucksStoreID);
+                        Console.WriteLine("Adding Store ID {0}", store.StarbucksStoreID);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Updating Store ID {0}", store.StarbucksStoreID);
+                    }
 
                 }
 

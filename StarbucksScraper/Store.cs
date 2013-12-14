@@ -39,6 +39,8 @@ namespace StarbucksScraper
         public int TZOffset { get; set; }
         public string TZID { get; set; }
         public string TZOlsonID { get; set; }
+        public System.DateTime LastSeen { get; set; }
+        public System.DateTime FirstSeen { get; set; }
     
         public virtual ICollection<Feature> Features { get; set; }
         public virtual ICollection<RegularHour> RegularHours { get; set; }
