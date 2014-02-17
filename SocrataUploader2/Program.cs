@@ -172,6 +172,12 @@ namespace SocrataUploader2
                     row.Add("Olson Timezone", store.TZOlsonID);
                     row.Add("First Seen", store.FirstSeen.ToUniversalTime());
 
+                    // if we add the coordinates when we don't have them, the rows don't error, but magically disappear... fucking socrata
+                    if (store.Latitude != null && store.Longitude != null)
+                    {
+                        row.Add("Coordinates", String.Format("({0}, {1})", store.Latitude, store.Longitude));
+                    }
+
                     /*
                     row = new Dictionary<string, object>();
                     row.Add("ID", new System.Random().Next());
