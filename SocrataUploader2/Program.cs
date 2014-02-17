@@ -130,22 +130,25 @@ namespace SocrataUploader2
 
                 foreach (var store in mostRecentStores)
                 {
-                    var streetCombined = "";
+                    List<string> streetPieces = new List<string>();
+                    string streetCombined;
 
                     if (store.Street1 != null && store.Street1.Trim() != "")
                     {
-                        streetCombined = streetCombined + store.Street1.Trim();
+                        streetPieces.Add(store.Street1.Trim());
                     }
 
                     if (store.Street2 != null && store.Street2.Trim() != "")
                     {
-                        streetCombined = streetCombined + ", " + store.Street2.Trim();
+                        streetPieces.Add(store.Street2.Trim());
                     }
 
                     if (store.Street3 != null && store.Street3.Trim() != "")
                     {
-                        streetCombined = streetCombined + ", " + store.Street3.Trim();
+                        streetPieces.Add(store.Street3.Trim());
                     }
+
+                    streetCombined = String.Join(", ", streetPieces);
 
                     var row = new Dictionary<string, object>();
                     row.Add("Store ID", store.StarbucksStoreID);
