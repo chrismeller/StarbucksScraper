@@ -48,7 +48,7 @@ namespace SocrataUploader2
             request.AddParameter("method", "copy", ParameterType.QueryString);     // since it's a POST we have to make sure this gets used as a Query String, not POST body
 
             IRestResponse<DataSetMeta> response;
-            var attempts = 0;
+            var attempts = 1;
             var threshold = 30;     // sometimes this can take a VERY long time
             var waitTime = 5;
             do
@@ -62,7 +62,7 @@ namespace SocrataUploader2
 
                 if (response.StatusCode == System.Net.HttpStatusCode.Accepted)
                 {
-                    // wait for 3 seconds between requests so we don't max out attempts
+                    // wait for a few seconds between requests so we don't max out attempts
                     Console.WriteLine("Working copy is {0}. Waiting for {1} seconds. Attempt {2} of {3}.", response.Data.status, waitTime, attempts, threshold);
                     System.Threading.Thread.Sleep(waitTime * 1000);
                 }
