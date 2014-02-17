@@ -244,6 +244,17 @@ namespace SocrataUploader2
             {
                 return true;
             }
+            else if (response.ErrorMessage != null && response.ErrorMessage != ""){
+                throw new SocrataException(String.Format("Unable to upsert batch: {0}", response.ErrorMessage), response.ErrorException);
+            }
+            else if (response.Data["Errors"] > 0)
+            {
+                throw new SocrataException(String.Format("Unable to Upsert Batch. {0} record(s) threw an error.", response.Data["Errors"]));
+            }
+            else if (response.Data["Rows Created"] != (rows as LinkedList<Dictionary<string, object>>).Count)
+            {
+                throw new SocrataException("There were fewer rows created than we sent!");
+            }
             else
             {
                 throw new SocrataException(String.Format("Unable to Upsert batch: {0}", response.ErrorMessage), response.ErrorException);
