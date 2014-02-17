@@ -170,6 +170,7 @@ namespace SocrataUploader2
                     row.Add("Timezone", store.TZID);
                     row.Add("Current Timezone Offset", store.TZOffset);
                     row.Add("Olson Timezone", store.TZOlsonID);
+                    row.Add("First Seen", store.FirstSeen.ToUniversalTime());
 
                     /*
                     row = new Dictionary<string, object>();
