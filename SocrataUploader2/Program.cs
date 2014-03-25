@@ -186,7 +186,7 @@ namespace SocrataUploader2
 
                     rows.AddLast(row);
 
-                    Console.WriteLine("Added store {0}", store.StarbucksStoreID);
+                    //Console.WriteLine("Added store {0}", store.StarbucksStoreID);
 
                     if (rows.Count >= batchSize)
                     {
