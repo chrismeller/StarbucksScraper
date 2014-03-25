@@ -190,8 +190,11 @@ namespace SocrataUploader2
 
                     if (rows.Count >= batchSize)
                     {
-                        Console.WriteLine("Upserting batch of {0}", rows.Count);
+                        DateTime startTime = DateTime.UtcNow;
+                        Console.Write("Upserting batch of {0}", rows.Count);
                         var result = Upsert(datasetId, rows);
+
+                        Console.WriteLine(" {0} rows / second", Math.Round((rows.Count / (DateTime.UtcNow - startTime).TotalSeconds), 3));
                         rows.Clear();
 
                     }
