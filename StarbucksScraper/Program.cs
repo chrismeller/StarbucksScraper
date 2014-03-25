@@ -73,11 +73,11 @@ namespace StarbucksScraper
                         response = client.Execute<StarbucksResults>(request);
                         attempts++;
                     }
-                    while (response != null && response.StatusCode != System.Net.HttpStatusCode.OK && attempts < threshold && response.ErrorMessage != "");
+                    while (response != null && response.Data != null && response.StatusCode != System.Net.HttpStatusCode.OK && attempts < threshold && response.ErrorMessage != "");
 
-                    if (response == null || response.StatusCode != System.Net.HttpStatusCode.OK)
+                    if (response == null || response.Data == null || response.StatusCode != System.Net.HttpStatusCode.OK)
                     {
-                        throw new Exception("Response was null or status code was invalid and we're out of retries.");
+                        throw new Exception("Response was null, we couldn't decode the result, or status code was invalid and we're out of retries.");
                     }
 
                     Console.WriteLine("Got {0} in response.", response.Data.Paging.Returned);
