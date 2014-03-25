@@ -193,11 +193,11 @@ namespace StarbucksScraper
                         // insert the store to generate an ID
                         db.Stores.Add(store);
 
-                        Console.WriteLine("Adding Store ID {0}", store.StarbucksStoreID);
+                        //Console.WriteLine("Adding Store ID {0}", store.StarbucksStoreID);
                     }
                     else
                     {
-                        Console.WriteLine("Updating Store ID {0}", store.StarbucksStoreID);
+                        //Console.WriteLine("Updating Store ID {0}", store.StarbucksStoreID);
                     }
 
                 }
