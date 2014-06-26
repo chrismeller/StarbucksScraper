@@ -115,7 +115,7 @@ namespace SocrataUploader2
 
             var truncate = TruncateWorkingCopy(datasetId);
 
-            var batchSize = 2000;
+            var batchSize = 1000;
 
             using (var db = new StoresEntities())
             {
