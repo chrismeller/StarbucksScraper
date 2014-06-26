@@ -128,6 +128,7 @@ namespace SocrataUploader2
 
                 Console.WriteLine("Got {0} stores to upload for {1} batch", mostRecentStores.Count(), mostRecent.ToString());
 
+                var numUpserted = 0;
                 foreach (var store in mostRecentStores)
                 {
                     List<string> streetPieces = new List<string>();
@@ -194,7 +195,9 @@ namespace SocrataUploader2
                         Console.Write("Upserting batch of {0}", rows.Count);
                         var result = Upsert(datasetId, rows);
 
-                        Console.WriteLine(" {0} rows / second", Math.Round((rows.Count / (DateTime.UtcNow - startTime).TotalSeconds), 3));
+                        numUpserted += rows.Count;
+
+                        Console.WriteLine(" {0} rows / second. {1} left.", Math.Round((rows.Count / (DateTime.UtcNow - startTime).TotalSeconds), 3), (mostRecentStores.Count() - numUpserted));
                         rows.Clear();
 
                     }
