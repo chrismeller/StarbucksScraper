@@ -21,8 +21,15 @@ namespace SocrataUploader2
 
         private static RestClient _client;
 
+        private static bool runAutomated = false;
+
         static void Main(string[] args)
         {
+
+            if (args.Contains("--automated"))
+            {
+                runAutomated = true;
+            }
 
             _host = ConfigurationManager.AppSettings["SocrataHost"];
             _datasetId = ConfigurationManager.AppSettings["SocrataDatasetID"];
@@ -35,7 +42,11 @@ namespace SocrataUploader2
             Upload();
 
             Console.WriteLine("Complete");
-            Console.ReadKey();
+
+            if (!runAutomated)
+            {
+                Console.ReadKey();
+            }
         }
 
         private static string CreateWorkingCopy()

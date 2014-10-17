@@ -14,8 +14,15 @@ namespace StarbucksScraper
         private static int _limit = 50;
         private static DateTime _lastSeen;
 
+        private static bool runAutomated = false;
+
         static void Main(string[] args)
         {
+
+            if (args.Contains("--automated"))
+            {
+                runAutomated = true;
+            }
 
             // we're going to mark all the records in the DB as being last seen as of today to keep track of historical values -- round it to today to account for incomplete runs on the same day
             _lastSeen = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 0, 0, 0, DateTimeKind.Utc);
@@ -23,7 +30,7 @@ namespace StarbucksScraper
             // figure out where to start
             using (var db = new StoresEntities())
             {
-
+                
                 var currentEntries = db.Stores.Select(s => s.LastSeen).Where(s => s == _lastSeen).Count();
                 var offset = 0;
 
@@ -92,7 +99,11 @@ namespace StarbucksScraper
                 while ((response.Data.Paging.Offset == 0 && response.Data.Paging.Total > response.Data.Paging.Limit) || (response.Data.Paging.Offset > 0 && (response.Data.Paging.Total > (response.Data.Paging.Offset + response.Data.Paging.Limit))));
 
                 Console.Write("Complete");
-                Console.ReadKey();
+
+                if (!runAutomated)
+                {
+                    Console.ReadKey();
+                }
 
             }
 
